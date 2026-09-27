@@ -8,6 +8,7 @@ public class Tests {
     public static void main(String[] args) {
         testDynamicArray();
         testLinkedList();
+        testMinHeap();
         System.out.println();
         System.out.println("Passed: " + passed + ", Failed: " + failed);
         if (failed > 0) {
@@ -136,5 +137,46 @@ public class Tests {
             }
         }
         check("large input matches java.util.LinkedList", matches);
+    }
+    private static void testMinHeap() {
+        MinHeap<Integer> h = new MinHeap<>();
+
+        boolean threw = false;
+        try {
+            h.peekMin();
+        } catch (java.util.NoSuchElementException e) {
+            threw = true;
+        }
+        check("peekMin on empty throws", threw);
+
+        h.insert(5);
+        check("single element peekMin", h.peekMin() == 5);
+        check("heap property after single insert", h.isValidHeap());
+
+        h.insert(3);
+        h.insert(8);
+        h.insert(1);
+        h.insert(3);
+        check("heap property after several inserts", h.isValidHeap());
+        check("peekMin is the minimum", h.peekMin() == 1);
+
+        Random rnd = new Random(42);
+        MinHeap<Integer> big = new MinHeap<>();
+        int n = 5000;
+        for (int i = 0; i < n; i++) {
+            big.insert(rnd.nextInt(100000));
+        }
+        int prev = Integer.MIN_VALUE;
+        boolean nonDecreasing = true;
+        boolean validAtEveryStep = true;
+        for (int i = 0; i < n; i++) {
+            if (!big.isValidHeap()) validAtEveryStep = false;
+            int cur = big.extractMin();
+            if (cur < prev) nonDecreasing = false;
+            prev = cur;
+        }
+        check("extractMin non-decreasing over " + n + " elements", nonDecreasing);
+        check("heap property held before every extraction", validAtEveryStep);
+        check("heap empty after extracting everything", big.isEmpty());
     }
 }
